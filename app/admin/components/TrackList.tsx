@@ -40,6 +40,12 @@ export default function TrackList({ refreshTrigger }: { refreshTrigger: boolean 
   const [editFile, setEditFile] = useState<File | null>(null);
   const [updating, setUpdating] = useState(false);
   const [updateStatus, setUpdateStatus] = useState("");
+  // حالات لتشغيل الفيديو داخل مودال منبثق
+  const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
+  const [activeVideoTitle, setActiveVideoTitle] = useState<string>("");
+  // حالات لتشغيل الصوت داخل مودال منبثق
+  const [activeAudioUrl, setActiveAudioUrl] = useState<string | null>(null);
+  const [activeAudioTitle, setActiveAudioTitle] = useState<string>("");
 
   // جلب المقاطع من قاعدة البيانات
   async function fetchTracks() {
@@ -252,18 +258,38 @@ function isVideoFile(url: string) {
             <TableRow key={track.id}>
               <TableCell className="font-medium text-primary">{track.title}</TableCell>
               <TableCell className="text-gray-500 max-w-xs truncate">{track.description || "—"}</TableCell>
-              {/* تبديل المشغل تلقائياً حسب نوع الملف */}
+              
+              {/* التبديل التلقائي بين زري الصوت والفيديو لفتح المودال المخصص */}
               <TableCell>
                 {isVideoFile(track.audio_url) ? (
-                  <video 
-                    src={track.audio_url} 
-                    controls 
-                    className="h-16 w-28 rounded-lg outline-none bg-black object-contain shadow-sm border border-gray-100" 
-                  />
+                  <Button 
+                    size="sm"
+                    color="primary"
+                    variant="flat"
+                    onClick={() => {
+                      setActiveVideoUrl(track.audio_url);
+                      setActiveVideoTitle(track.title);
+                    }}
+                    className="font-semibold text-xs h-8 px-3"
+                  >
+                    📺 تشغيل الفيديو
+                  </Button>
                 ) : (
-                  <audio src={track.audio_url} controls className="h-8 w-44 outline-none" />
+                  <Button 
+                    size="sm"
+                    color="secondary"
+                    variant="flat"
+                    onClick={() => {
+                      setActiveAudioUrl(track.audio_url);
+                      setActiveAudioTitle(track.title);
+                    }}
+                    className="font-semibold text-xs h-8 px-3"
+                  >
+                    🔊 تشغيل الصوت
+                  </Button>
                 )}
               </TableCell>
+
               {/* خلية الـ QR تدعم التكبير والنسخ والتنزيل */}
               <TableCell className="text-center">
                 <div className="flex flex-col items-center gap-1.5 justify-center">
@@ -300,11 +326,12 @@ function isVideoFile(url: string) {
                       onClick={() => handleCopyLink(track.id)}
                       className="text-[10px] h-6 px-1.5 min-w-0"
                     >
-                      {copiedTrackId === track.id ? "✔️ نسخ" : "🔗 نسخ"}
+                      {copiedTrackId === track.id ? "✔️ تم" : "🔗 نسخ"}
                     </Button>
                   </div>
                 </div>
               </TableCell>
+
               {/* عمود عدد التقييمات */}
               <TableCell className="text-right text-sm text-gray-600 font-semibold">
                 {track.ratings?.length || 0} تقييم
@@ -335,7 +362,7 @@ function isVideoFile(url: string) {
         </TableBody>
       </Table>
 
-      {/* مودال التعديل الأنيق من NextUI */}
+      {/* 1️⃣ مودال التعديل الأنيق من NextUI (منفصل ومستقل) */}
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center" dir="rtl">
         <ModalContent>
           {(onClose) => (
@@ -376,26 +403,94 @@ function isVideoFile(url: string) {
                   تحديث البيانات
                 </Button>
               </ModalFooter>
-              {/* مودال تكبير الـ QR بدقة وشفافية */}
-                <Modal isOpen={!!zoomQrUrl} onClose={() => setZoomQrUrl(null)} placement="center" dir="rtl">
-                  <ModalContent>
-                    <ModalHeader className="text-primary font-bold">🔍 تكبير الـ QR Code - {zoomTrackTitle}</ModalHeader>
-                    <ModalBody className="flex flex-col items-center justify-center py-6">
-                      {zoomQrUrl && (
-                        <img 
-                        src={zoomQrUrl} 
-                        alt="Zoomed QR" 
-                        className="w-64 h-64 border rounded-lg p-2 bg-white shadow-md"
-                        />
-                      )}
-                    </ModalBody>
-                    <ModalFooter>
-                      <Button color="danger" variant="flat" onClick={() => setZoomQrUrl(null)}>
-                        إغلاق
-                      </Button>
-                    </ModalFooter>
-                  </ModalContent>
-                </Modal>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* 2️⃣ مودال تكبير الـ QR بدقة وشفافية متوافق تماماً مع NextUI */}
+      <Modal isOpen={!!zoomQrUrl} onClose={() => setZoomQrUrl(null)} placement="center" dir="rtl">
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="text-primary font-bold">🔍 تكبير الـ QR Code - {zoomTrackTitle}</ModalHeader>
+              <ModalBody className="flex flex-col items-center justify-center py-6">
+                {zoomQrUrl && (
+                  <img 
+                    src={zoomQrUrl} 
+                    alt="Zoomed QR" 
+                    className="w-64 h-64 border rounded-lg p-2 bg-white shadow-md"
+                  />
+                )}
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="flat" onClick={onClose}>
+                  إغلاق
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* 3️⃣ مودال تشغيل الفيديو الأنيق والمنبثق متوافق تماماً مع NextUI */}
+      <Modal 
+        isOpen={!!activeVideoUrl} 
+        onClose={() => setActiveVideoUrl(null)} 
+        placement="center" 
+        size="2xl" 
+        dir="rtl"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="text-primary font-bold">📺 تشغيل الفيديو - {activeVideoTitle}</ModalHeader>
+              <ModalBody className="flex flex-col items-center justify-center p-2 bg-black rounded-lg">
+                {activeVideoUrl && (
+                  <video 
+                    src={activeVideoUrl} 
+                    controls 
+                    autoPlay 
+                    className="w-full rounded-lg outline-none max-h-[60vh]"
+                  />
+                )}
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="flat" onClick={onClose}>
+                  إغلاق
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+      {/* 4️⃣ مودال تشغيل الصوت الأنيق والمنبثق متوافق تماماً مع NextUI */}
+      <Modal 
+        isOpen={!!activeAudioUrl} 
+        onClose={() => setActiveAudioUrl(null)} 
+        placement="center" 
+        size="md" // حجم متوسط مناسب لتشغيل الصوت
+        dir="rtl"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="text-primary font-bold">🔊 تشغيل الصوت - {activeAudioTitle}</ModalHeader>
+              <ModalBody className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-lg border border-gray-100">
+                {activeAudioUrl && (
+                  <audio 
+                    src={activeAudioUrl} 
+                    controls 
+                    autoPlay // تشغيل تلقائي لراحة المستخدم عند الفتح
+                    className="w-full outline-none h-10"
+                  />
+                )}
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="flat" onClick={onClose}>
+                  إغلاق
+                </Button>
+              </ModalFooter>
             </>
           )}
         </ModalContent>
