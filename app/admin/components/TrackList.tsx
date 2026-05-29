@@ -137,6 +137,11 @@ export default function TrackList({ refreshTrigger }: { refreshTrigger: boolean 
     function setUint32(data: number) { view.setUint32(pos, data, true); pos += 4; }
   }
 
+  // دالة مساعدة للتحقق هل الرابط لملف فيديو أم صوتي
+function isVideoFile(url: string) {
+  const cleanUrl = url.split("?")[0].toLowerCase();
+  return cleanUrl.endsWith(".mp4") || cleanUrl.endsWith(".webm") || cleanUrl.endsWith(".mov") || cleanUrl.endsWith(".mkv");
+}
   async function handleUpdate(onClose: () => void) {
     if (!selectedTrack) return;
 
@@ -232,8 +237,13 @@ export default function TrackList({ refreshTrigger }: { refreshTrigger: boolean 
             <TableRow key={track.id}>
               <TableCell className="font-medium text-primary">{track.title}</TableCell>
               <TableCell className="text-gray-500 max-w-xs truncate">{track.description || "—"}</TableCell>
+              {/* تبديل المشغل تلقائياً حسب نوع الملف */}
               <TableCell>
-                <audio src={track.audio_url} controls className="h-8 w-48 outline-none" />
+                {isVideoFile(track.audio_url) ? (
+                  <video src={track.audio_url} controls className="h-12 w-48 rounded-lg outline-none object-cover" />
+                ) : (
+                  <audio src={track.audio_url} controls className="h-8 w-48 outline-none" />
+                )}
               </TableCell>
               {/* 👇 أضف هذه الخلية هنا لعرض الـ QR وزر التنزيل التلقائي باسم الدرس */}
               <TableCell className="text-center">

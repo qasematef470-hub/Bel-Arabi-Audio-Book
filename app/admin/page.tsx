@@ -218,7 +218,7 @@ export default function AdminDashboard() {
               <h2 className="text-xl font-semibold text-primary border-b pb-2">🎙️ رفع مقطع صوتي جديد</h2>
               <form onSubmit={handleUpload} className="space-y-4">
                 <Input
-                  label="عنوان المقطع الصوتي"
+                  label="عنوان المقطع "
                   placeholder="مثال: قراءة الفصل الأول"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -231,10 +231,10 @@ export default function AdminDashboard() {
                   onChange={(e) => setDescription(e.target.value)}
                 />
                 <div className="flex flex-col gap-1">
-                  <span className="text-xs text-gray-500">الملف الصوتي (MP3, WAV, etc.)</span>
+                  <span className="text-xs text-gray-500">الملف الصوتي أو المرئي (MP3, MP4, WAV, etc.)</span>
                   <input
                     type="file"
-                    accept="audio/*"
+                    accept="audio/*,video/*" 
                     onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
                     className="file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-secondary/10 file:text-secondary hover:file:bg-secondary/20 cursor-pointer text-sm text-gray-500 border rounded-md p-2"
                     required

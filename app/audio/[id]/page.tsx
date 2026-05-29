@@ -69,6 +69,12 @@ export default function StudentAudioPage() {
     fetchData();
   }, [trackId]);
 
+  // دالة مساعدة للتحقق هل الرابط لملف فيديو أم صوتي
+  function isVideoFile(url: string) {
+    const cleanUrl = url.split("?")[0].toLowerCase();
+    return cleanUrl.endsWith(".mp4") || cleanUrl.endsWith(".webm") || cleanUrl.endsWith(".mov") || cleanUrl.endsWith(".mkv");
+  }
+
   // دالة إرسال التقييم بالنجوم لقاعدة البيانات (نسخة واحدة صحيحة ومؤمنة)
   async function handleRate(value: number) {
     if (rated || submittingRate) return;
@@ -137,14 +143,23 @@ export default function StudentAudioPage() {
               )}
             </div>
 
-            {/* مشغل الصوت المدمج */}
+            {/* مشغل الصوت أو الفيديو المدمج والذكي */}
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-center justify-center">
-              <audio 
-                src={track.audio_url} 
-                controls 
-                className="w-full outline-none h-10"
-                controlsList="nodownload" 
-              />
+              {isVideoFile(track.audio_url) ? (
+                <video 
+                  src={track.audio_url} 
+                  controls 
+                  className="w-full rounded-lg outline-none max-h-60"
+                  controlsList="nodownload" 
+                />
+              ) : (
+                <audio 
+                  src={track.audio_url} 
+                  controls 
+                  className="w-full outline-none h-10"
+                  controlsList="nodownload" 
+                />
+              )}
             </div>
 
             {/* مكون التقييم التفاعلي بالنجوم */}
