@@ -16,7 +16,22 @@ interface Track {
 export default function TrackList({ refreshTrigger }: { refreshTrigger: boolean }) {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
-  
+  // حالات لتكبير الـ QR ونسخ الرابط
+  const [zoomQrUrl, setZoomQrUrl] = useState<string | null>(null);
+  const [zoomTrackTitle, setZoomTrackTitle] = useState<string>("");
+  const [copiedTrackId, setCopiedTrackId] = useState<string | null>(null);
+
+  // دالة نسخ رابط المقطع للحافظة تلقائياً
+  const handleCopyLink = async (trackId: string) => {
+    const trackUrl = `${window.location.origin}/audio/${trackId}`;
+    try {
+      await navigator.clipboard.writeText(trackUrl);
+      setCopiedTrackId(trackId);
+      setTimeout(() => setCopiedTrackId(null), 2000); // إخفاء علامة النجاح بعد ثانيتين
+    } catch (err) {
+      console.error("Failed to copy link:", err);
+    }
+  };
   // حالات التعديل
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
@@ -240,28 +255,54 @@ function isVideoFile(url: string) {
               {/* تبديل المشغل تلقائياً حسب نوع الملف */}
               <TableCell>
                 {isVideoFile(track.audio_url) ? (
-                  <video src={track.audio_url} controls className="h-12 w-48 rounded-lg outline-none object-cover" />
+                  <video 
+                    src={track.audio_url} 
+                    controls 
+                    className="h-16 w-28 rounded-lg outline-none bg-black object-contain shadow-sm border border-gray-100" 
+                  />
                 ) : (
-                  <audio src={track.audio_url} controls className="h-8 w-48 outline-none" />
+                  <audio src={track.audio_url} controls className="h-8 w-44 outline-none" />
                 )}
               </TableCell>
-              {/* 👇 أضف هذه الخلية هنا لعرض الـ QR وزر التنزيل التلقائي باسم الدرس */}
+              {/* خلية الـ QR تدعم التكبير والنسخ والتنزيل */}
               <TableCell className="text-center">
-                <div className="flex flex-col items-center gap-1 justify-center">
-                  <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${window.location.origin}/audio/${track.id}`)}`} 
-                    alt="QR Code" 
-                    className="w-12 h-12 border rounded p-0.5 bg-white shadow-sm"
-                  />
-                  <Button 
-                    size="sm" 
-                    color="secondary" 
-                    variant="flat" 
-                    onClick={() => downloadQRCode(track.id, track.title)}
-                    className="text-[10px] h-6 px-2 min-w-0"
+                <div className="flex flex-col items-center gap-1.5 justify-center">
+                  <button 
+                    onClick={() => {
+                      const trackUrl = `${window.location.origin}/audio/${track.id}`;
+                      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(trackUrl)}`;
+                      setZoomQrUrl(qrUrl);
+                      setZoomTrackTitle(track.title);
+                    }}
+                    className="focus:outline-none hover:scale-105 transition-transform"
+                    title="اضغط لتكبير الكود"
                   >
-                    ⬇️ تنزيل
-                  </Button>
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${window.location.origin}/audio/${track.id}`)}`} 
+                      alt="QR Code" 
+                      className="w-11 h-11 border rounded p-0.5 bg-white shadow-sm cursor-pointer"
+                    />
+                  </button>
+                  <div className="flex gap-1">
+                    <Button 
+                      size="sm" 
+                      color="secondary" 
+                      variant="flat" 
+                      onClick={() => downloadQRCode(track.id, track.title)}
+                      className="text-[10px] h-6 px-1.5 min-w-0"
+                    >
+                      ⬇️ تنزيل
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      color={copiedTrackId === track.id ? "success" : "default"} 
+                      variant="flat" 
+                      onClick={() => handleCopyLink(track.id)}
+                      className="text-[10px] h-6 px-1.5 min-w-0"
+                    >
+                      {copiedTrackId === track.id ? "✔️ نسخ" : "🔗 نسخ"}
+                    </Button>
+                  </div>
                 </div>
               </TableCell>
               {/* عمود عدد التقييمات */}
@@ -335,6 +376,26 @@ function isVideoFile(url: string) {
                   تحديث البيانات
                 </Button>
               </ModalFooter>
+              {/* مودال تكبير الـ QR بدقة وشفافية */}
+                <Modal isOpen={!!zoomQrUrl} onClose={() => setZoomQrUrl(null)} placement="center" dir="rtl">
+                  <ModalContent>
+                    <ModalHeader className="text-primary font-bold">🔍 تكبير الـ QR Code - {zoomTrackTitle}</ModalHeader>
+                    <ModalBody className="flex flex-col items-center justify-center py-6">
+                      {zoomQrUrl && (
+                        <img 
+                        src={zoomQrUrl} 
+                        alt="Zoomed QR" 
+                        className="w-64 h-64 border rounded-lg p-2 bg-white shadow-md"
+                        />
+                      )}
+                    </ModalBody>
+                    <ModalFooter>
+                      <Button color="danger" variant="flat" onClick={() => setZoomQrUrl(null)}>
+                        إغلاق
+                      </Button>
+                    </ModalFooter>
+                  </ModalContent>
+                </Modal>
             </>
           )}
         </ModalContent>
