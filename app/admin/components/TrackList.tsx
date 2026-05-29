@@ -190,6 +190,27 @@ export default function TrackList({ refreshTrigger }: { refreshTrigger: boolean 
     }
   }
 
+  // دالة توليد وتحميل الـ QR Code مباشرة بجودة عالية وباسم الدرس
+  async function downloadQRCode(trackId: string, trackTitle: string) {
+    const trackUrl = `${window.location.origin}/audio/${trackId}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&transparent=true&data=${encodeURIComponent(trackUrl)}`;
+    
+    try {
+      const response = await fetch(qrUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${trackTitle}.png`; // التنزيل التلقائي باسم الدرس
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading QR code:", error);
+    }
+  }
+  
   if (loading) return <p className="text-center text-gray-500 py-4">جاري تحميل المقاطع الصوتيّة المرفوعة...</p>;
   if (tracks.length === 0) return <p className="text-center text-gray-400 py-4">لا توجد مقاطع صوتية مرفوعة حالياً.</p>;
 
@@ -200,6 +221,7 @@ export default function TrackList({ refreshTrigger }: { refreshTrigger: boolean 
           <TableColumn className="text-right">عنوان المقطع</TableColumn>
           <TableColumn className="text-right">الوصف</TableColumn>
           <TableColumn className="text-right">الاستماع</TableColumn>
+          <TableColumn className="text-center">الـ QR Code</TableColumn>
           <TableColumn className="text-right">عدد التقييمات</TableColumn>
           <TableColumn className="text-right">متوسط التقييم</TableColumn>
           <TableColumn className="text-right">تاريخ الرفع</TableColumn>
@@ -213,7 +235,25 @@ export default function TrackList({ refreshTrigger }: { refreshTrigger: boolean 
               <TableCell>
                 <audio src={track.audio_url} controls className="h-8 w-48 outline-none" />
               </TableCell>
-
+              {/* 👇 أضف هذه الخلية هنا لعرض الـ QR وزر التنزيل التلقائي باسم الدرس */}
+              <TableCell className="text-center">
+                <div className="flex flex-col items-center gap-1 justify-center">
+                  <img 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${window.location.origin}/audio/${track.id}`)}`} 
+                    alt="QR Code" 
+                    className="w-12 h-12 border rounded p-0.5 bg-white shadow-sm"
+                  />
+                  <Button 
+                    size="sm" 
+                    color="secondary" 
+                    variant="flat" 
+                    onClick={() => downloadQRCode(track.id, track.title)}
+                    className="text-[10px] h-6 px-2 min-w-0"
+                  >
+                    ⬇️ تنزيل
+                  </Button>
+                </div>
+              </TableCell>
               {/* عمود عدد التقييمات */}
               <TableCell className="text-right text-sm text-gray-600 font-semibold">
                 {track.ratings?.length || 0} تقييم
