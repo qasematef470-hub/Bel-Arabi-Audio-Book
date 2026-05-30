@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "بالعربي - BelArabi",
   description: "Arabic Beyond Textbooks",
+  icons: {
+    icon: "/images/logo.png",
+  },
 };
 
 export default function RootLayout({

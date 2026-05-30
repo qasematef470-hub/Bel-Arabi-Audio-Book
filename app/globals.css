@@ -1,3 +1,138 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ==========================================
+   ADVANCED PREMIUM KEYFRAME ANIMATIONS
+   ========================================== */
+
+/* --- 3D Wave Horizontal & Vertical Parallax --- */
+@keyframes wave-front {
+  0% {
+    transform: translateX(0) translateY(0px) scaleY(1);
+  }
+  50% {
+    transform: translateX(-25%) translateY(4px) scaleY(1.04);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0px) scaleY(1);
+  }
+}
+
+@keyframes wave-back {
+  0% {
+    transform: translateX(-50%) translateY(0px) scaleY(1);
+  }
+  50% {
+    transform: translateX(-25%) translateY(-4px) scaleY(0.96);
+  }
+  100% {
+    transform: translateX(0) translateY(0px) scaleY(1);
+  }
+}
+
+.animate-wave-front {
+  animation: wave-front 16s ease-in-out infinite;
+}
+
+.animate-wave-back {
+  animation: wave-back 22s ease-in-out infinite;
+}
+
+/* --- Floating Logo Fish Ocean Drift --- */
+@keyframes swim-right-1 {
+  0% {
+    transform: translate(-10vw, 0) rotate(0deg) scale(0.9);
+    opacity: 0;
+  }
+  10% { opacity: 0.08; }
+  35% { transform: translate(30vw, -25px) rotate(8deg) scale(1.0); }
+  70% { transform: translate(70vw, 15px) rotate(-6deg) scale(0.95); }
+  90% { opacity: 0.08; }
+  100% {
+    transform: translate(110vw, -5px) rotate(4deg) scale(0.9);
+    opacity: 0;
+  }
+}
+
+@keyframes swim-left-1 {
+  0% {
+    transform: translate(110vw, 0) rotate(0deg) scale(0.85) scaleX(-1);
+    opacity: 0;
+  }
+  12% { opacity: 0.07; }
+  45% { transform: translate(65vw, 35px) rotate(-9deg) scale(0.9) scaleX(-1); }
+  75% { transform: translate(25vw, -15px) rotate(9deg) scale(0.85) scaleX(-1); }
+  90% { opacity: 0.07; }
+  100% {
+    transform: translate(-10vw, 5px) rotate(-4deg) scale(0.85) scaleX(-1);
+    opacity: 0;
+  }
+}
+
+@keyframes swim-right-2 {
+  0% {
+    transform: translate(-10vw, 40px) rotate(-4deg) scale(0.7);
+    opacity: 0;
+  }
+  15% { opacity: 0.06; }
+  50% { transform: translate(50vw, -30px) rotate(10deg) scale(0.75); }
+  85% { opacity: 0.06; }
+  100% {
+    transform: translate(110vw, 25px) rotate(-6deg) scale(0.7);
+    opacity: 0;
+  }
+}
+
+@keyframes swim-left-2 {
+  0% {
+    transform: translate(110vw, -25px) rotate(4deg) scale(0.75) scaleX(-1);
+    opacity: 0;
+  }
+  10% { opacity: 0.05; }
+  50% { transform: translate(45vw, 25px) rotate(-10deg) scale(0.8) scaleX(-1); }
+  88% { opacity: 0.05; }
+  100% {
+    transform: translate(-10vw, -15px) rotate(6deg) scale(0.75) scaleX(-1);
+    opacity: 0;
+  }
+}
+
+.animate-fish-1 {
+  animation: swim-right-1 28s linear infinite;
+}
+.animate-fish-2 {
+  animation: swim-left-1 35s linear infinite;
+}
+.animate-fish-3 {
+  animation: swim-right-2 42s linear infinite;
+}
+.animate-fish-4 {
+  animation: swim-left-2 30s linear infinite;
+}
+
+/* --- Interactive Audio Equalizer Bar Animation --- */
+@keyframes eq-bar {
+  0% {
+    transform: scaleY(0.15);
+  }
+  100% {
+    transform: scaleY(1.0);
+  }
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3); /* Slate-400 with low opacity */
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.6);
+}
